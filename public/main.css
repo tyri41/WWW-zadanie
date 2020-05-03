@@ -57,6 +57,7 @@
     display: flex;
     padding: 1.25rem;
     width: 800px;
+    height: fit-content;
     align-content: normal;
     justify-self: center;
     grid-area: main;
