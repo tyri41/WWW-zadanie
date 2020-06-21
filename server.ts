@@ -1,8 +1,7 @@
-import { runInNewContext } from "vm";
-
 var express = require('express');
 let app = express();
-
+var bodyParser = require('body-parser');
+// app.use(bodyParser.urlencoded({ extended: true }));
 // app.set('trustproxy', true);
 var session = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(session);
@@ -28,6 +27,9 @@ let port = 8008;
 
 let changePass = db.prepare("UPDATE Users SET pass = ? WHERE name = ?");
 let getUsers = db.prepare("SELECT * FROM Users");
+let addResult = db.prepare("INSERT INTO Results (idQ, idU, data) VALUES (?, ?, ?)");
+let addAnswer = db.prepare("INSERT INTO Answers (idQ, nr, data) VALUES (?, ?, ?)");
+let getStats = db.prepare("SELECT data FROM Results WHERE idQ = ? AND idU = ?");
 
 let quizzes = db.prepare("SELECT * FROM Quizzes").all();
 quizzes.forEach(quiz => {
@@ -39,7 +41,7 @@ let users = getUsers.all();
 function getCompleted(userId) {
     let res = db.prepare('select idQ from Results where idU = ?').all(userId);
     let ret = Array.from({length: quizNames.length + 1}, (v, i) => 0);
-    res.forEach(el => { ret[el] = 1; });
+    res.forEach(el => { ret[el.idQ] = 1; });
     return ret;
 } 
 // console.log(users);
@@ -86,12 +88,51 @@ app.get('/logout', function(req, res, next) {
     next();
 });
 
+app.post('/quiz/:quizId', express.json(), function(req, res, next) {
+    if(req.session.user) {
+        console.log("solve", req.body);
+        // console.log(req);
+        let result = req.body;
+        let time = (Date.now() - req.session.timestamp) / 1000;
+        // console.log(time);
+        type Row = {answer: string, time: any, correct: boolean};
+        let stats: Row[] = result.map( (row, i) => {
+            let corr: boolean = row.answer == quizzes[req.params.quizId-1].data[i].answer;
+            return <Row> {answer: row.answer, time: (row.timeF * time).toPrecision(4), correct: corr};
+        });
+        console.log(stats);
+        addResult.run(req.params.quizId, req.session.idU, JSON.stringify(stats));
+        stats.forEach((row, i) => { 
+            if(row.correct)
+                addAnswer.run(req.params.quizId, i, row.time) 
+        });
+    }
+    // res.send("OK");
+    next();
+});
+
 app.get('/quiz/:quizId', function(req, res, next) {
-    console.log('quiz', req.params)
-    let qId = req.params.quizId;
-    req.quiz = quizzes[qId-1];
-    console.log(req.quiz);
-    req.done = getCompleted(req.session.idU)[qId];
+    if(req.session.user) {
+        console.log('quiz', req.params)
+        let qId = req.params.quizId;
+        req.quiz = { ...quizzes[qId-1]};
+        console.log(quizzes[qId-1]);
+        req.done = getCompleted(req.session.idU)[qId];
+        if(!req.done) { // remove excess information about quiz 
+            req.quiz.data = quizzes[qId-1].data.map( el => el.text);
+            req.quiz.topScores = undefined;
+        } else {
+            let stats = JSON.parse(getStats.pluck().get(req.quiz.id, req.session.idU));
+            req.stats = [];
+            let data = req.quiz.data;
+            for(var i = 0;i<req.quiz.data.length;i++) {
+                let row = {question: data[i].text, answer: data[i].answer, answerU: stats[i].answer, time: stats[i].time, penalty: data[i].penalty};
+                if(stats[i].correct) row.penalty = 0;
+                req.stats.push(row);
+            }
+        }
+        console.log(req.done, req.quiz);
+    }
     next();
 });
 
@@ -114,11 +155,16 @@ app.all('/*', function(req, res) {
             args.quiz = req.quiz;
             args.done = req.done;
             req.session.timestamp = Date.now();
+            // console.log(args);
+            if(req.done) 
+                args.stats = req.stats;
+            console.log(args.stats);
             view = 'quiz';
             url = '/quiz/' + req.quiz.id;
         } else {
             args.quizzes = quizNames;
             args.done = getCompleted(req.session.idU);
+            console.log(args.done);
             view = 'me';
             url = '/me';
         }
@@ -128,7 +174,6 @@ app.all('/*', function(req, res) {
     res.location(url);
     res.render(view, args);
 });
-
 
 // set up server
 app.listen(port, function() {

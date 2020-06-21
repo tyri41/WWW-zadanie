@@ -37,6 +37,8 @@ block main
         label(for='passNew') new password: 
         input.form-control(type='password',  name='passNew')
       button.btn.btn-warning(type='submit') Change password
+  script.
+    updateBtn();
 
 block nav
   a Logged as #{name}

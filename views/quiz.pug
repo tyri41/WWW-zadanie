@@ -2,9 +2,9 @@ extends base
 
 block append scripts
   script(src='/public/main.js')
-  script(type='text/javascript')
-    | var getVal= !{JSON.stringify(quiz)};
-    | console.log(getVal);
+  script(type='text/javascript').
+    var quiz = !{JSON.stringify(quiz)};
+    load();
 
 block main
   .jumbotron.mainBox
@@ -16,20 +16,74 @@ block main
         thead
           tr
             th question
-            th answer
-            th panalty
+            th correct answer
+            th your answer
+            th time
+            th penalty
         tbody
-          for el in quiz.data
+          for el in stats
             tr
-              th #{el.text}
+              th #{el.question}
               th #{el.answer}
+              th #{el.answerU}
+              th #{el.time}
               th #{el.penalty}
     else
-      include partial.html
-  .jumbotron.mainBox
-    a #{quiz.name}
-    for el in quiz.data
-      p #{el.text}
+      #questions_section
+        // pytania
+        h2#tIntro #{quiz.intro}
+        #question_fields.chalkboard
+          .rowFlex
+            #q
+            div(style='margin-left: 20px')  = 
+            input#answer.input(type='text' oninput='setAnswer(currentQuestion, answer.value, bDone)')
+            #timer.timer 2
+          .rowFlex
+            label#prev.boardLabel(style='grid-area: prev;' onclick='prev()') #{'<'}
+            label#curr.boardLabel(style='grid-area: cur;') 1/2
+            label#next.boardLabel(style='grid-area: next;' onclick='next()') #{'>'}
+        .scoreBottom
+          button#bQuit.btn Quit
+          button#bDone.btn Done
+        #finish
+          a Quiz submitted
+          a.btn.btn-primary(href = '/') Go back
+          a.btn.btn-primary(href = '/quiz/' + quiz.id) See results
+      script.
+        function byId(x) { return document.getElementById(x); }
+        let finish = byId('finish');
+        finish.style.display = 'none';
+        let bDone = byId('bDone');
+        let bQuit = byId('bQuit');
+        let prev = byId('prev');
+        let next = byId('next');
+        let question_fields = [
+          byId('timer'),
+          byId('q'),
+          byId('answer'),
+          byId('prev'),
+          byId('curr'),
+          byId('next')
+        ];
+        let answer = byId("answer");
+        let currentQuestion = 0;
+        setQuestion(currentQuestion, question_fields, answer);
+        prev.onclick = () => {currentQuestion--; setQuestion(currentQuestion, question_fields);}
+        next.onclick = () => {currentQuestion++; setQuestion(currentQuestion, question_fields);}
+        bQuit.onclick = () => { window.location = '/'; }
+        bDone.onclick = () => { 
+          endQuiz(); 
+          answer.disabled = true;
+          finish.style.display = 'block';
+        }
+        answer.addEventListener("keyup", event => {
+          console.log(event.keyCode);
+          console.log(next.style.visibility);
+          if (event.keyCode === 13) {
+              if(bDone.style.visibility == 'visible') bDone.click();
+              else if(next.style.visibility == 'visible') next.click();
+          }
+        });
 
 block nav
   a Logged as #{name}
