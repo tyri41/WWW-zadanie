@@ -4,9 +4,30 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "npx ts-node server.ts",
+    "createdb": "npx ts-node build.ts"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.1.0",
+    "bootstrap": "^4.5.0",
+    "connect-sqlite3": "^0.9.11",
+    "cookie-parser": "^1.4.5",
+    "core-js": "^3.6.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jade-bootstrap": "^1.0.14",
+    "pug": "^3.0.0",
+    "pug-cli": "^1.0.0-alpha6",
+    "sqlite3": "^4.2.0",
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.12",
+    "@types/sqlite3": "^3.1.6",
+    "ts-node": "^8.10.2"
+  }
 }

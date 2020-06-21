@@ -1,0 +1,22 @@
+[
+    {
+        "name": "two for two",
+        "intro": "hello there!",
+        "questions": [
+            {"text": "2 + 2", "answer": "4", "penalty": 10},
+            {"text": "2 * 2", "answer": "4", "penalty": 10},
+            {"text": "2^2", "answer": "4", "penalty": 10},
+            {"text": "2 + 2 * 2/2", "answer": "4", "penalty": 10}
+        ]
+    },
+    {
+        "name": "step up",
+        "intro": "now for something harder",
+        "questions": [
+            {"text": "d/dx(x^2) at (x = 2)", "answer": "4", "penalty": 20},
+            {"text": "d/dx(1/x) at (x = 1)", "answer": "-1", "penalty": 22},
+            {"text": "d/dy(4x^2 + 3x - 5) at (x = 8)", "answer": "0", "penalty": 24},
+            {"text": "d/dx 8/((x-1)^2) at (x = 3)", "answer": "-2", "penalty": 30}
+        ]
+    }
+]

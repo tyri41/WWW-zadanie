@@ -1,0 +1,166 @@
+<div id="starting_section">
+    <!-- strona startowa -->
+    <select class='select' id="selection"></select>
+    <button class='btn' id="bSelect">Start</button>
+    <div><h2 id='ranking_name'>Ranking:</h2>
+    <table class='table' id="board">
+        <thead>
+            <th style="width: 30px;">place</th>
+            <th>name</th>
+            <th>score</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+    </div>
+</div>
+<div id="questions_section">
+    <!-- pytania -->
+    <h2 id="tIntro"></h2>
+    <div class="chalkboard" id="question_fields">
+        <div class="rowFlex">
+            <div id='q'></div>
+            <div style='margin-left: 20px'> = </div>
+            <input id="answer" class='input' type='text' oninput="setAnswer(currentQuestion, answer.value, bDone)">
+            <div id='timer' class='timer'>2</div>
+        </div>
+        <div class="rowFlex">
+            <label id='prev' class='boardLabel' style='grid-area: prev;' onclick="prev()">&lt</label>
+            <label id='curr' class="boardLabel" style='grid-area: cur;'>1/2</label>
+            <label id='next' class="boardLabel" style='grid-area: next;' onclick="next()">&gt</label>
+        </div>
+    </div>
+    <div class='scoreBottom'>
+        <button class="btn" id="bQuit">Quit</button>
+        <button class="btn" id="bDone">Done</button> 
+    </div>
+</div>
+<div id="scoring_section">
+    <h2>Results:</h2>
+    <table class="table" id="scoring">
+        <thead>
+            <tr>
+                <th>question</th>
+                <th>answer</th>
+                <th>score</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <h3 id='totalScore'></h3>
+    <div class='scoreBottom'>
+        <button class="btn" id="bGoBack">Go back</button>
+        <div style="display: inline-flex;">
+            <input type='text' id="recName" class='input-name' value='name'>
+            <button class="btn" id="bSave">Save</button>
+        </div>
+    </div>
+</div>
+<script>
+    if(localStorage.getItem('list') == null) localStorage.setItem('list', JSON.stringify([]));
+    function byId(x) { return document.getElementById(x); }
+    let selection = byId('selection');
+    let bSelect = byId('bSelect');
+    let bStart = byId('bDone');
+    let bQuit = byId('bQuit');
+    let bSave = byId('bSave');
+    let bGoback = byId('bGoBack');
+    let sections = [
+        byId('starting_section'),
+        byId('questions_section'),
+        byId('scoring_section')
+    ];
+    let question_fields = [
+        byId('timer'),
+        byId('q'),
+        byId('answer'),
+        byId('prev'),
+        byId('curr'),
+        byId('next')
+    ];
+    let answer = byId("answer");
+    // 0->time, 1->question, 4->prev, 5->current, 6->next
+    let scoring = byId("scoring").children[1];
+    let totalScore = byId('totalScore');
+    function changeSection(n) {
+        for(var el of sections) el.style.display = 'none';
+        sections[n].style.display = 'block';
+    }
+    selection.sele
+    
+    let currentQuestion;
+    // answer.oninput = setAnswer(currentQuestion, answer.value, bDone);
+    bSelect.onclick = function() { // start asking questions
+        setQuiz(selection.selectedIndex, byId('tIntro'));
+        bDone.style.visibility = 'hidden';
+        changeSection(1);
+        currentQuestion = 0;
+        setQuestion(currentQuestion, question_fields, answer);
+    }
+    function prev() {currentQuestion--; setQuestion(currentQuestion, question_fields);}
+    function next() {currentQuestion++; setQuestion(currentQuestion, question_fields);}
+    bQuit.onclick = function() { // forfeit quiz
+        changeSection(0);
+        setUpRanking();
+        quitQuiz();
+    }
+    let total;
+    bDone.onclick = function() { // complete quiz
+        endQuiz();
+        changeSection(2);
+        total = getResults(scoring);
+        totalScore.textContent = "Total score is: " + total;
+    }
+    answer.addEventListener("keyup", function(event) {
+        console.log(event.keyCode);
+        console.log(byId('next').style.visibility);
+        if (event.keyCode === 13) {
+            if(bDone.style.visibility == 'visible') bDone.click();
+            else if(byId('next').style.visibility == 'visible') next();
+        }
+    });
+    bGoback.onclick = function() {
+        changeSection(0);
+        setUpRanking();
+    }
+    bSave.onclick = function() {
+        let record = {name: byId('recName').value, score: total};
+        let data = JSON.parse(localStorage.getItem("list"));
+        let list = data[selection.selectedIndex];
+        if(list == null) list = [record];
+        else list.push(record);
+        data[selection.selectedIndex] = list;
+        localStorage.setItem("list",JSON.stringify(data));
+        changeSection(0);
+        setUpRanking(0);
+    }
+    let board = byId('board').children[1];
+    function setUpRanking() {
+        while(board.rows.length > 0) board.deleteRow(0);
+        let data = JSON.parse(localStorage.getItem('list'));
+        data = data[selection.selectedIndex];
+        if(data == null) return;
+        data.sort((a, b) => (a.score > b.score) ? 1 : -1);
+        for(let [i, r] of data.entries()) {
+            let row = board.insertRow();
+            let cell = row.insertCell();
+            cell.textContent = i + 1;
+            cell = row.insertCell();
+            cell.textContent = r.name;
+            cell = row.insertCell();
+            cell.textContent = r.score;
+        }
+        byId('ranking_name').textContent = "Ranking of: " + selection.value;
+    }
+    function clearData() {
+        localStorage.setItem('list', JSON.stringify([]));
+        setUpRanking();
+    }
+    selection.onchange = function() {setUpRanking()};
+    changeSection(0); // init
+    for(var name of getNames()) { // quizes to choose from
+        let t = document.createElement('option');
+        t.text = name;
+        selection.add(t);
+    }
+    setUpRanking();
+</script>

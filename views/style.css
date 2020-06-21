@@ -1,0 +1,20 @@
+.mainBox {
+    width: 800px;
+    padding: 25px;
+    background-color: lightgray;
+    margin: 30px auto 30px auto;
+}
+
+.err {
+    color: red !important;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+body {
+    background-image: url(https://d2gg9evh47fn9z.cloudfront.net/800px_COLOURBOX4713346.jpg);
+}
+
+nav {
+    background-color: lightgray;
+}

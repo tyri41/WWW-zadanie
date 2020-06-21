@@ -1,0 +1,32 @@
+html(lang='en')
+  head
+    title quiz
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css")
+    block links
+    block scripts
+      script(src="https://code.jquery.com/jquery-1.11.2.min.js")
+      script(src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js")
+      script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js")
+
+  style
+    include style.css
+    block styles
+
+    //- src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"
+    //- src='../scripts/main.js'
+
+  body
+    nav.navbar.navbar-expand-lg.navbar-light
+      div.collapse.navbar-collapse
+        block nav
+        a.navbar-nav.mr-auto
+        a.btn.btn-secondary(href = "/logout") logout
+    
+    block main
+    
+    nav.navbar.fixed-bottom.navbar-light
+      a.err #{err}
+      a #{msg}
+      block foot
+      a.mr-auto
+      a by Grzegorz Kwiatkowski

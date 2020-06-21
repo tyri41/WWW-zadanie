@@ -1,0 +1,16 @@
+extends base
+
+block main
+  div.jumbotron.mainBox
+    h1= "Please, log in:"
+    form(method='POST' action="/login")
+      div.form-group
+        label(for='name') Username: 
+        input.form-control(type='text',  name='name')
+      div.form-group
+        label(for='name') password: 
+        input.form-control(type='password',  name='pass')
+      button.btn.btn-primary(type='submit') Login
+
+block nav
+  a Currently not logged in

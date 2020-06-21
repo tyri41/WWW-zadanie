@@ -1,0 +1,35 @@
+extends base
+
+block append scripts
+  script(src='/public/main.js')
+  script(type='text/javascript')
+    | var getVal= !{JSON.stringify(quiz)};
+    | console.log(getVal);
+
+block main
+  .jumbotron.mainBox
+    if done
+      .d-flex
+        h2.mr-auto Your scores: 
+        a.btn.btn-primary.align-self-center(href='/')  go back
+      table.table.table-striped.table-hover.table-bordered
+        thead
+          tr
+            th question
+            th answer
+            th panalty
+        tbody
+          for el in quiz.data
+            tr
+              th #{el.text}
+              th #{el.answer}
+              th #{el.penalty}
+    else
+      include partial.html
+  .jumbotron.mainBox
+    a #{quiz.name}
+    for el in quiz.data
+      p #{el.text}
+
+block nav
+  a Logged as #{name}

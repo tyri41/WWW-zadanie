@@ -1,0 +1,42 @@
+extends base
+
+block append scripts
+  //- script(src='/scripts/main.js')
+  script.
+    let done = !{JSON.stringify(done)};
+    function goToQuiz() {
+      let url ='/quiz/' + document.getElementById('quizSelect').value;
+      window.location = url;
+    }
+    function updateBtn() {
+      let val = document.getElementById('quizSelect').value;
+      console.log("val is " + val);
+      let str;
+      if(done[val]) str = "See results";
+      else str = "Solve";
+      document.getElementById('bToQuiz').text = str;
+    }
+
+block main
+  div.jumbotron.mainBox
+    h2 Choose a quiz:
+    div.input-group
+      select.custom-select#quizSelect(onChange='updateBtn()')
+        for q in quizzes
+          option(value = q.id) #{q.name}
+      div.input-group-append
+        a.btn.btn-primary#bToQuiz(href='#' onclick='goToQuiz()')  Solve
+        //- a.btn.btn-primary(href='#' onclick='goToQuiz()')  See scores
+  div.jumbotron.mainBox
+    h2 Change password:
+    form(method='POST' action="/changePass")
+      div.form-group
+        label(for='pass') old password: 
+        input.form-control(type='password',  name='pass')
+      div.form-group
+        label(for='passNew') new password: 
+        input.form-control(type='password',  name='passNew')
+      button.btn.btn-warning(type='submit') Change password
+
+block nav
+  a Logged as #{name}
