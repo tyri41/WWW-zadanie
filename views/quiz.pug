@@ -7,8 +7,8 @@ block append scripts
     load();
 
 block main
-  .jumbotron.mainBox
-    if done
+  if done
+    .jumbotron.mainBox
       .d-flex
         h2.mr-auto Your scores: 
         a.btn.btn-primary.align-self-center(href='/')  go back
@@ -20,15 +20,42 @@ block main
             th your answer
             th time
             th penalty
+            th average time
         tbody
           for el in stats
             tr
               th #{el.question}
               th #{el.answer}
-              th #{el.answerU}
+              if el.answer == el.answerU
+                th(style='color: green')= el.answerU + " \u2713"
+              else
+                th(style='color: red')= el.answerU + " \u2715"
               th #{el.time}
               th #{el.penalty}
-    else
+              th #{el.avg} 
+    .jumbotron.mainBox
+      h2 High scores
+      table.table.table-striped.table-hover.table-bordered
+        thead
+          tr
+            th place
+            th name
+            th score
+        tbody
+        - var i = 0
+        while i < 5
+          tr
+            th= ++i
+            if highScores[i-1]
+              th #{highScores[i-1].name}
+              th #{highScores[i-1].score}
+            else
+              th -
+              th -
+          //- - i = i + 1
+
+  else
+    .jumbotron.mainBox
       #questions_section
         // pytania
         h2#tIntro #{quiz.intro}
@@ -46,14 +73,17 @@ block main
           button#bQuit.btn Quit
           button#bDone.btn Done
         #finish
-          a Quiz submitted
-          a.btn.btn-primary(href = '/') Go back
-          a.btn.btn-primary(href = '/quiz/' + quiz.id) See results
+          .d-flex
+            a.align-self-center.mr-auto Quiz submitted
+            .btn-group(role="group")
+              a.btn.btn-primary(href = '/') Go back
+              a.btn.btn-primary(href = '/quiz/' + quiz.id) See results
       script.
         function byId(x) { return document.getElementById(x); }
         let finish = byId('finish');
         finish.style.display = 'none';
         let bDone = byId('bDone');
+        bDone.style.display = 'none';
         let bQuit = byId('bQuit');
         let prev = byId('prev');
         let next = byId('next');

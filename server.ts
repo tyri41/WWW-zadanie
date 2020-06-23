@@ -27,9 +27,13 @@ let port = 8008;
 
 let changePass = db.prepare("UPDATE Users SET pass = ? WHERE name = ?");
 let getUsers = db.prepare("SELECT * FROM Users");
-let addResult = db.prepare("INSERT INTO Results (idQ, idU, data) VALUES (?, ?, ?)");
+let addResult = db.prepare("INSERT INTO Results (idQ, idU, data, score) VALUES (?, ?, ?, ?)");
 let addAnswer = db.prepare("INSERT INTO Answers (idQ, nr, data) VALUES (?, ?, ?)");
 let getStats = db.prepare("SELECT data FROM Results WHERE idQ = ? AND idU = ?");
+let getAverage = db.prepare("select nr, avg(data) as av from Answers where idQ = ? group by nr;");
+let getHighScores = db.prepare(`SELECT name, score 
+    FROM Users INNER JOIN Results ON Users.id = Results.idU
+    WHERE idQ = ? ORDER BY score LIMIT 5`);
 
 let quizzes = db.prepare("SELECT * FROM Quizzes").all();
 quizzes.forEach(quiz => {
@@ -95,13 +99,18 @@ app.post('/quiz/:quizId', express.json(), function(req, res, next) {
         let result = req.body;
         let time = (Date.now() - req.session.timestamp) / 1000;
         // console.log(time);
+        let currentQuiz = quizzes[req.params.quizId-1];
         type Row = {answer: string, time: any, correct: boolean};
+        let score = 0;
         let stats: Row[] = result.map( (row, i) => {
-            let corr: boolean = row.answer == quizzes[req.params.quizId-1].data[i].answer;
-            return <Row> {answer: row.answer, time: (row.timeF * time).toPrecision(4), correct: corr};
+            let corr: boolean = row.answer == currentQuiz.data[i].answer;
+            let tTime = (row.timeF * time).toPrecision(4);
+            score += row.timeF * time;
+            if(!corr) score += currentQuiz.data[i].penalty;
+            return <Row> {answer: row.answer, time: tTime, correct: corr};
         });
         console.log(stats);
-        addResult.run(req.params.quizId, req.session.idU, JSON.stringify(stats));
+        addResult.run(req.params.quizId, req.session.idU, JSON.stringify(stats), score);
         stats.forEach((row, i) => { 
             if(row.correct)
                 addAnswer.run(req.params.quizId, i, row.time) 
@@ -116,7 +125,7 @@ app.get('/quiz/:quizId', function(req, res, next) {
         console.log('quiz', req.params)
         let qId = req.params.quizId;
         req.quiz = { ...quizzes[qId-1]};
-        console.log(quizzes[qId-1]);
+        // console.log(quizzes[qId-1]);
         req.done = getCompleted(req.session.idU)[qId];
         if(!req.done) { // remove excess information about quiz 
             req.quiz.data = quizzes[qId-1].data.map( el => el.text);
@@ -125,13 +134,17 @@ app.get('/quiz/:quizId', function(req, res, next) {
             let stats = JSON.parse(getStats.pluck().get(req.quiz.id, req.session.idU));
             req.stats = [];
             let data = req.quiz.data;
+            let avg = getAverage.all(qId);
             for(var i = 0;i<req.quiz.data.length;i++) {
-                let row = {question: data[i].text, answer: data[i].answer, answerU: stats[i].answer, time: stats[i].time, penalty: data[i].penalty};
+                let row = {question: data[i].text, answer: data[i].answer, answerU: stats[i].answer, time: stats[i].time, penalty: data[i].penalty, avg: 0};
+                avg.forEach( el => {
+                    if(el.nr == i) row.avg = el.av.toPrecision(4);
+                });
                 if(stats[i].correct) row.penalty = 0;
                 req.stats.push(row);
             }
         }
-        console.log(req.done, req.quiz);
+        // console.log(req.done, req.quiz);
     }
     next();
 });
@@ -158,6 +171,7 @@ app.all('/*', function(req, res) {
             // console.log(args);
             if(req.done) 
                 args.stats = req.stats;
+                args.highScores = getHighScores.all(args.quiz.id);
             console.log(args.stats);
             view = 'quiz';
             url = '/quiz/' + req.quiz.id;
@@ -171,6 +185,7 @@ app.all('/*', function(req, res) {
     } else {
         view = 'login';
     }
+    console.log(args);
     res.location(url);
     res.render(view, args);
 });

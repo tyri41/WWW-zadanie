@@ -24,6 +24,7 @@ CREATE TABLE Results (
     idQ INTEGER NOT NULL,
     idU INTEGER NOT NULL,
     data BLOB,
+    score REAL,
     PRIMARY KEY(id)
 );
 

@@ -18,3 +18,82 @@ body {
 nav {
     background-color: lightgray;
 }
+
+.chalkboard {
+    background-color: black;
+    border-radius: 6px;
+    padding: .75rem;
+    color: white;
+    font-size: larger;
+    font-weight: 400;
+    font-family: chalktasticitalic, Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.rowFlex {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    align-content: space-between;
+    font-size: 30px;
+    text-align: center;
+}
+
+.timer {
+    text-align: right;
+    text-shadow: grey;
+    width: 80px;
+}
+
+@font-face {
+    font-family: 'chalktasticitalic';
+    src: url('/public/chalktasticitalic.woff2') format('woff2'),
+         url('/public/chalktasticitalic.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.input {
+    background: transparent;
+    border-color: white;
+    border-width: 0px 0px 2px 0px;
+    border-style: dashed;
+    /* border: none; */
+    margin-bottom: 0.5rem;
+    width: 100px;
+    height: 35px;
+    font-size: 30px;
+    color: white;
+    margin-left: 20px;
+    font-family: chalktasticitalic, Arial, Helvetica, sans-serif;
+}
+.input:focus {
+    outline: none;
+}
+
+.boardLabel {
+    /* margin: 5px; */
+    width: 45px;
+    text-align: center;
+    color: white;
+    font-family: chalktasticitalic, Arial, Helvetica, sans-serif;
+    background: transparent;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.input-name {
+    padding: .375rem .75rem;
+    height: 25px;
+    font-size: 20px;
+    width: 100px;
+    border-radius: 5px;
+}
+
+.scoreBottom {
+    display: inline-flex;
+    justify-content: space-around;
+    width: 80%;
+}
