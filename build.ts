@@ -16,8 +16,9 @@ f.forEach(el => {
 
 console.log(f.length + " quizzes added");
 
-let addUser = db.prepare("INSERT INTO Users (name, pass) VALUES (?, ?)");
-addUser.run('user1', 'user1');
-addUser.run('user2', 'user2');
+let addUser = db.prepare("INSERT INTO Users (name, pass, lastPass) VALUES (?, ?, ?)");
+let time = Date.now();
+addUser.run('user1', 'user1', time);
+addUser.run('user2', 'user2', time);
 
 console.log("2 users added");

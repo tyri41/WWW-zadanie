@@ -77,7 +77,7 @@ block main
             a.align-self-center.mr-auto Quiz submitted
             .btn-group(role="group")
               a.btn.btn-primary(href = '/') Go back
-              a.btn.btn-primary(href = '/quiz/' + quiz.id) See results
+              a.btn.btn-primary#score(href = '/quiz/' + quiz.id) See results
       script.
         function byId(x) { return document.getElementById(x); }
         let finish = byId('finish');

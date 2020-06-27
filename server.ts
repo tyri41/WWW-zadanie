@@ -25,7 +25,7 @@ let db = new Database('db/quiz.db');
 
 let port = 8008;
 
-let changePass = db.prepare("UPDATE Users SET pass = ? WHERE name = ?");
+let changePass = db.prepare("UPDATE Users SET pass = ?, lastPass = ? WHERE name = ?");
 let getUsers = db.prepare("SELECT * FROM Users");
 let addResult = db.prepare("INSERT INTO Results (idQ, idU, data, score) VALUES (?, ?, ?, ?)");
 let addAnswer = db.prepare("INSERT INTO Answers (idQ, nr, data) VALUES (?, ?, ?)");
@@ -65,8 +65,20 @@ app.post('/login', function(req, res, next) {
             req.session.user = name;
             req.session.idU = el.id;
             req.err = undefined;
+            req.session.timeStamp = Date.now();
         }
     });
+    next();
+});
+
+app.all('/*', function(req, res, next) {
+    if(req.session && req.session.user) {
+        users.forEach(el => {
+            if(req.session.user == el.name && req.session.timeStamp < el.lastPass) {
+                req.session.user = undefined;
+            }
+        });
+    }
     next();
 });
 
@@ -78,7 +90,7 @@ app.post('/changePass', function(req, res, next) {
     users.forEach(el => {
         if(req.session.user == el.name && pass == el.pass) {
             req.session.user = undefined;
-            changePass.run(passNew, el.name);
+            changePass.run(passNew, Date.now(), el.name);
             users = getUsers.all();
             req.err = undefined;
         }
@@ -88,6 +100,7 @@ app.post('/changePass', function(req, res, next) {
 
 app.get('/logout', function(req, res, next) {
     req.session.user = undefined;
+    // req.session.destroy();
     console.log("logout");
     next();
 });
@@ -151,18 +164,21 @@ app.get('/quiz/:quizId', function(req, res, next) {
 
 app.all('/*', function(req, res) {
     // console.log(req.session);
-    console.log("star " + req.session.user);
-    if(req.session.count) req.session.count ++;
-    else req.session.count = 1;
     // let tdb = new Database('db/sessions.db');
     // console.log(tdb.prepare('select * from sessions').all());
-    if(!req.msg)
-        req.msg = "Visited " + req.session.count + " pages this session";
+    if(req.session) {
+        console.log(req.session);
+        console.log("star " + req.session.user);
+        if(req.session.count) req.session.count ++;
+        else req.session.count = 1;
+        if(!req.msg)
+            req.msg = "Visited " + req.session.count + " pages this session";
+    }
     let args: {[k: string]: any} = {msg: req.msg, err: req.err};
     let url = '/';
     let view;
     console.log(req.msg, req.err);
-    if(req.session.user) {
+    if(req.session && req.session.user) {
         args.name = req.session.user;
         if(req.quiz) {
             args.quiz = req.quiz;

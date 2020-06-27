@@ -6,10 +6,10 @@ block main
     form(method='POST' action="/login")
       div.form-group
         label(for='name') Username: 
-        input.form-control(type='text',  name='name')
+        input.form-control#login(type='text',  name='name')
       div.form-group
         label(for='name') password: 
-        input.form-control(type='password',  name='pass')
+        input.form-control#pass(type='password',  name='pass')
       button.btn.btn-primary(type='submit') Login
 
 block nav

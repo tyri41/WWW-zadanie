@@ -27,10 +27,10 @@ function setTimer(n, el) {
 function setAnswer(n, s, el) {
     answers[n] = s;
     for (var v of answers) if(v == "") {
-        el.style.visibility = 'hidden';
+        el.style.display = 'none';
         return;
     }
-    el.style.visibility = 'visible';
+    el.style.display = 'block';
 }
 
 //block: 0->time, 1->question, 2->answer, 3->prev, 4->current, 5->next

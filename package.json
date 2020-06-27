@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx mocha -r ts-node/register test/test.ts",
     "server": "npx ts-node server.ts",
     "createdb": "npx ts-node build.ts"
   },
@@ -23,12 +23,19 @@
     "jade-bootstrap": "^1.0.14",
     "pug": "^3.0.0",
     "pug-cli": "^1.0.0-alpha6",
-    "sqlite3": "^4.2.0",
-    "typescript": "^3.9.5"
+    "sqlite3": "^4.2.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
     "@types/node": "^14.0.12",
+    "@types/selenium-webdriver": "^4.0.9",
     "@types/sqlite3": "^3.1.6",
-    "ts-node": "^8.10.2"
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1",
+    "mocha-webdriver": "^0.2.8",
+    "selenium-webdriver": "^4.0.0-alpha.7",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
   }
 }

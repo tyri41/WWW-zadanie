@@ -16,6 +16,7 @@ CREATE TABLE Users (
     id INTEGER NOT NULL,
     name TEXT NOT NULL,
     pass TEXT NOT NULL,
+    lastPass INTEGER NOT NULL,
     PRIMARY KEY(id)
 );
 
